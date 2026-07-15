@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StudyAI — Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F1424;
+    --ink-2:#171E36;
+    --paper:#EDEDF2;
+    --paper-dim:#B7BCD6;
+    --muted:#8A93B8;
+    --amber:#F2B84B;
+    --amber-dim:#F2B84B33;
+    --green:#5FD9A4;
+    --rose:#F2836B;
+    --line: rgba(237,237,242,0.10);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  .shell{display:flex;min-height:100vh;}
+
+  /* Sidebar */
+  .sidebar{
+    width:230px;
+    flex-shrink:0;
+    background:var(--ink-2);
+    border-right:1px solid var(--line);
+    padding:28px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .brand{
+    font-size:20px;
+    font-weight:600;
+    margin:0 8px 28px 8px;
+    letter-spacing:-0.01em;
+  }
+  .brand .dot{color:var(--amber);}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:10px;
+    color:var(--paper-dim);
+    cursor:pointer;
+    font-size:14.5px;font-weight:500;
+    transition:background .15s ease, color .15s ease;
+    user-select:none;
+  }
+  .nav-item:hover{background:rgba(237,237,242,0.05);color:var(--paper);}
+  .nav-item.active{background:var(--amber-dim);color:var(--amber);}
+  .nav-icon{width:18px;text-align:center;font-size:15px;}
+  .sidebar-foot{
+    margin-top:auto;padding:12px;
+    font-size:12px;color:var(--muted);
+    border-top:1px solid var(--line);
+  }
+
+  /* Main */
+  .main{flex:1;padding:36px 44px;overflow-y:auto;}
+  .topline{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px;flex-wrap:wrap;gap:10px;}
+  .page-title{font-size:28px;font-weight:600;margin:0;}
+  .page-sub{color:var(--muted);font-size:14px;margin-top:4px;}
+  .demo-badge{
+    font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--ink);background:var(--amber);
+    padding:5px 10px;border-radius:100px;font-weight:600;
+  }
+
+  .grid{display:grid;gap:18px;}
+  .grid-4{grid-template-columns:repeat(4,1fr);}
+  .grid-3{grid-template-columns:2fr 1fr;}
+  @media(max-width:900px){.grid-4{grid-template-columns:repeat(2,1fr);} .grid-3{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+  }
+  .stat-label{font-size:12.5px;color:var(--muted);margin-bottom:8px;}
+  .stat-value{font-size:30px;font-weight:600;font-family:'Fraunces',serif;}
+  .stat-delta{font-size:12px;margin-top:6px;}
+  .up{color:var(--green);} .down{color:var(--rose);}
+
+  .bars{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:16px;}
+  .bar{flex:1;background:linear-gradient(to top, var(--amber), var(--amber-dim));border-radius:4px 4px 0 0;position:relative;}
+  .bar span{position:absolute;top:-20px;left:0;right:0;text-align:center;font-size:11px;color:var(--muted);}
+  .bar .day{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:11px;color:var(--muted);}
+
+  .topic-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .topic-row:last-child{border-bottom:none;}
+  .pill{font-size:11px;padding:3px 9px;border-radius:100px;font-weight:600;}
+  .pill.weak{background:#F2836B26;color:var(--rose);}
+  .pill.strong{background:#5FD9A426;color:var(--green);}
+
+  /* Upload */
+  .dropzone{
+    border:1.5px dashed var(--muted);
+    border-radius:var(--radius);
+    padding:48px 20px;text-align:center;color:var(--muted);
+    transition:border-color .15s, color .15s, background .15s;
+    cursor:pointer;
+  }
+  .dropzone:hover{border-color:var(--amber);color:var(--amber);background:rgba(242,184,75,0.04);}
+  .dropzone .icon{font-size:32px;margin-bottom:10px;display:block;}
+  .file-item{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 14px;background:var(--ink);border-radius:10px;margin-top:10px;font-size:14px;
+  }
+  .file-item .name{display:flex;align-items:center;gap:10px;}
+  .btn{
+    background:var(--amber);color:var(--ink);border:none;
+    padding:10px 18px;border-radius:10px;font-weight:600;font-size:13.5px;
+    cursor:pointer;transition:transform .1s ease, opacity .15s;
+  }
+  .btn:hover{opacity:.9;}
+  .btn:active{transform:scale(0.97);}
+  .btn.ghost{background:transparent;color:var(--paper);border:1px solid var(--line);}
+
+  /* Flashcards */
+  .flash-wrap{display:flex;flex-direction:column;align-items:center;gap:20px;}
+  .flash-progress{color:var(--muted);font-size:13px;}
+  .flashcard{
+    width:100%;max-width:520px;height:260px;
+    perspective:1400px;cursor:pointer;
+  }
+  .flashcard-inner{
+    position:relative;width:100%;height:100%;
+    transform-style:preserve-3d;transition:transform .5s cubic-bezier(.2,.8,.2,1);
+  }
+  .flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+  .face{
+    position:absolute;inset:0;backface-visibility:hidden;
+    border-radius:18px;padding:30px;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+    border:1px solid var(--line);
+  }
+  .face.front{background:var(--ink-2);}
+  .face.back{background:linear-gradient(160deg, #24304F, #171E36);transform:rotateY(180deg);}
+  .face .tag{font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;}
+  .face .q{font-size:19px;font-weight:600;line-height:1.4;font-family:'Fraunces',serif;}
+  .face .a{font-size:16px;line-height:1.5;color:var(--paper-dim);}
+  .flash-controls{display:flex;gap:10px;}
+
+  /* Quiz */
+  .quiz-q{font-size:18px;font-weight:600;margin-bottom:18px;font-family:'Fraunces',serif;}
+  .option{
+    display:block;width:100%;text-align:left;
+    padding:13px 16px;margin-bottom:10px;border-radius:10px;
+    background:var(--ink);border:1px solid var(--line);color:var(--paper);
+    cursor:pointer;font-size:14.5px;transition:border-color .15s, background .15s;
+  }
+  .option:hover{border-color:var(--muted);}
+  .option.selected{border-color:var(--amber);background:var(--amber-dim);}
+  .option.correct{border-color:var(--green);background:#5FD9A426;}
+  .option.incorrect{border-color:var(--rose);background:#F2836B26;}
+  .quiz-progress-bar{height:6px;background:var(--line);border-radius:100px;margin-bottom:22px;overflow:hidden;}
+  .quiz-progress-fill{height:100%;background:var(--amber);border-radius:100px;transition:width .3s;}
+  .explain{margin-top:14px;padding:14px;background:var(--ink);border-radius:10px;font-size:13.5px;color:var(--paper-dim);border-left:3px solid var(--amber);}
+
+  /* Schedule */
+  .day-card{background:var(--ink-2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;}
+  .day-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .day-head .d{font-weight:600;font-family:'Fraunces',serif;font-size:16px;}
+  .day-head .focus{font-size:12px;color:var(--amber);}
+  .task{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;padding:6px 0;color:var(--paper-dim);}
+  .task .time{color:var(--muted);width:70px;flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+
+  .view{display:none;animation:fade .25s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sidebar">
+    <div class="brand">Study<span class="dot">AI</span></div>
+    <div class="nav-item active" data-view="dashboard"><span class="nav-icon">◧</span> Dashboard</div>
+    <div class="nav-item" data-view="upload"><span class="nav-icon">⇪</span> Upload Material</div>
+    <div class="nav-item" data-view="flashcards"><span class="nav-icon">▤</span> Flashcards</div>
+    <div class="nav-item" data-view="quiz"><span class="nav-icon">✓</span> Quiz</div>
+    <div class="nav-item" data-view="schedule"><span class="nav-icon">▦</span> Schedule</div>
+    <div class="sidebar-foot mono">Cell Biology · Ch. 4<br>Uploaded 2 days ago</div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="topline">
+        <div>
+          <h1 class="page-title">Welcome back, Aditi</h1>
+          <div class="page-sub">Here's how your studying is going this week</div>
+        </div>
+        <div class="demo-badge">Preview · sample data</div>
+      </div>
+
+      <div class="grid grid-4" style="margin-bottom:18px;">
+        <div class="card"><div class="stat-label">Quizzes taken</div><div class="stat-value">12</div><div class="stat-delta up">▲ 3 this week</div></div>
+        <div class="card"><div class="stat-label">Avg. score</div><div class="stat-value">78%</div><div class="stat-delta up">▲ 6% vs last week</div></div>
+        <div class="card"><div class="stat-label">Cards mastered</div><div class="stat-value">64</div><div class="stat-delta up">▲ 11 new</div></div>
+        <div class="card"><div class="stat-label">Study streak</div><div class="stat-value">5 days</div><div class="stat-delta down">Missed Tue</div></div>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card">
+          <h3 style="margin:0 0 4px 0;font-size:15px;">Quiz performance — last 7 sessions</h3>
+          <div class="bars" id="chart"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 10px 0;font-size:15px;">Weak topics</h3>
+          <div class="topic-row"><span>Mitochondria &amp; ATP</span><span class="pill weak">Weak</span></div>
+          <div class="topic-row"><span>Cell Membrane Transport</span><span class="pill weak">Weak</span></div>
+          <div class="topic-row"><span>Mitosis Phases</span><span class="pill strong">Strong</span></div>
+          <div class="topic-row"><span>DNA Replication</span><span class="pill strong">Strong</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="view" id="view-upload">
+      <div class="topline">
+        <div><h1 class="page-title">Upload study material</h1><div class="page-sub">PDF, DOCX, or paste raw text</div></div>
+        <div class="demo-badge">Preview · sample data</div>
+      </div>
+      <div class="card">
+        <div class="dropzone" onclick="simulateUpload()">
+          <span class="icon">⇪</span>
+          <div style="font-weight:600;color:var(--paper);margin-bottom:4px;">Click to simulate a file drop</div>
+          <div style="font-size:13px;">In the real app: drag a PDF/DOCX here or paste text</div>
+        </div>
+        <div id="file-list"></div>
+      </div>
+    </div>
+
+    <!-- FLASHCARDS -->
+    <div class="view" id="view-flashcards">
+      <div class="topline">
+        <div><h1 class="page-title">Flashcards</h1><div class="page-sub">Cell Biology — Chapter 4</div></div>
+        <div class="demo-badge">Preview · sample data</div>
+      </div>
+      <div class="flash-wrap">
+        <div class="flash-progress mono" id="flash-progress">Card 1 of 6 · 2 mastered</div>
+        <div class="flashcard" id="flashcard" onclick="flipCard()">
+          <div class="flashcard-inner">
+            <div class="face front"><div class="tag">Question</div><div class="q" id="fc-q"></div></div>
+            <div class="face back"><div class="tag">Answer</div><div class="a" id="fc-a"></div></div>
+          </div>
+        </div>
+        <div class="flash-controls">
+          <button class="btn ghost" onclick="prevCard()">← Prev</button>
+          <button class="btn ghost" onclick="markKnown()">✓ Mark known</button>
+          <button class="btn" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="view" id="view-quiz">
+      <div class="topline">
+        <div><h1 class="page-title">Quiz</h1><div class="page-sub">MCQ · Cell Biology</div></div>
+        <div class="demo-badge">Preview · sample data</div>
+      </div>
+      <div class="card" style="max-width:560px;">
+        <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-fill"></div></div>
+        <div class="quiz-q" id="quiz-q"></div>
+        <div id="quiz-options"></div>
+        <div class="explain" id="quiz-explain" style="display:none;"></div>
+        <div style="margin-top:16px;display:flex;justify-content:flex-end;">
+          <button class="btn" id="quiz-next" onclick="nextQuestion()" style="display:none;">Next question →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="view" id="view-schedule">
+      <div class="topline">
+        <div><h1 class="page-title">7-day study plan</h1><div class="page-sub">Built around your weak topics</div></div>
+        <div class="demo-badge">Preview · sample data</div>
+      </div>
+      <div id="schedule-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ---- nav ----
+document.querySelectorAll('.nav-item').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('view-'+el.dataset.view).classList.add('active');
+  });
+});
+
+// ---- dashboard chart ----
+const scores=[62,68,71,65,74,80,78];
+const days=['M','T','W','T','F','S','S'];
+const chart=document.getElementById('chart');
+scores.forEach((s,i)=>{
+  const bar=document.createElement('div');
+  bar.className='bar';
+  bar.style.height=s+'%';
+  bar.innerHTML=`<span>${s}</span><span class="day">${days[i]}</span>`;
+  chart.appendChild(bar);
+});
+
+// ---- upload ----
+function simulateUpload(){
+  const list=document.getElementById('file-list');
+  list.innerHTML='';
+  const item=document.createElement('div');
+  item.className='file-item';
+  item.innerHTML=`<div class="name">📄 <span>Cell_Biology_Chapter4.pdf</span></div><span style="color:var(--green);font-size:12.5px;">✓ Processed</span>`;
+  list.appendChild(item);
+}
+
+// ---- flashcards ----
+const cards=[
+  {q:"What is the primary function of mitochondria in a cell?",a:"Mitochondria produce ATP through cellular respiration, providing the cell's main energy currency."},
+  {q:"What distinguishes facilitated diffusion from simple diffusion?",a:"Facilitated diffusion uses carrier or channel proteins to move substances across the membrane, while simple diffusion requires no protein assistance."},
+  {q:"Name the four phases of mitosis in order.",a:"Prophase, Metaphase, Anaphase, and Telophase."},
+  {q:"What enzyme unwinds the DNA double helix during replication?",a:"Helicase unwinds the double helix by breaking hydrogen bonds between base pairs."},
+  {q:"What is the role of the cell membrane's phospholipid bilayer?",a:"It forms a selectively permeable barrier that separates the cell's interior from its environment."},
+  {q:"What is active transport, and why does it require energy?",a:"Active transport moves substances against their concentration gradient, so it requires ATP to power the process."}
+];
+let idx=0, mastered=2;
+function renderCard(){
+  document.getElementById('fc-q').textContent=cards[idx].q;
+  document.getElementById('fc-a').textContent=cards[idx].a;
+  document.getElementById('flash-progress').textContent=`Card ${idx+1} of ${cards.length} · ${mastered} mastered`;
+  document.getElementById('flashcard').classList.remove('flipped');
+}
+function flipCard(){document.getElementById('flashcard').classList.toggle('flipped');}
+function nextCard(){idx=(idx+1)%cards.length;renderCard();}
+function prevCard(){idx=(idx-1+cards.length)%cards.length;renderCard();}
+function markKnown(){mastered=Math.min(mastered+1,cards.length);renderCard();nextCard();}
+renderCard();
+
+// ---- quiz ----
+const quiz=[
+  {q:"Which organelle is primarily responsible for producing ATP?",options:["Ribosome","Mitochondrion","Golgi apparatus","Lysosome"],correct:1,explain:"Mitochondria carry out oxidative phosphorylation, generating the majority of the cell's ATP."},
+  {q:"Which transport process requires energy input from the cell?",options:["Simple diffusion","Osmosis","Active transport","Facilitated diffusion"],correct:2,explain:"Active transport moves molecules against their concentration gradient, which requires ATP."},
+  {q:"Which phase of mitosis involves chromosomes lining up at the cell's equator?",options:["Prophase","Metaphase","Anaphase","Telophase"],correct:1,explain:"During metaphase, chromosomes align along the metaphase plate before separation."}
+];
+let qidx=0, qscore=0;
+function renderQuiz(){
+  const q=quiz[qidx];
+  document.getElementById('quiz-fill').style.width=((qidx)/quiz.length*100)+'%';
+  document.getElementById('quiz-q').textContent=`${qidx+1}. ${q.q}`;
+  const opts=document.getElementById('quiz-options');
+  opts.innerHTML='';
+  q.options.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='option';
+    b.textContent=o;
+    b.onclick=()=>selectOption(i);
+    opts.appendChild(b);
+  });
+  document.getElementById('quiz-explain').style.display='none';
+  document.getElementById('quiz-next').style.display='none';
+}
+function selectOption(i){
+  const q=quiz[qidx];
+  const opts=document.querySelectorAll('.option');
+  opts.forEach((o,idx2)=>{
+    o.onclick=null;
+    if(idx2===q.correct) o.classList.add('correct');
+    else if(idx2===i) o.classList.add('incorrect');
+  });
+  if(i===q.correct) qscore++;
+  const ex=document.getElementById('quiz-explain');
+  ex.style.display='block';
+  ex.textContent=q.explain;
+  document.getElementById('quiz-next').style.display='inline-block';
+  document.getElementById('quiz-fill').style.width=((qidx+1)/quiz.length*100)+'%';
+}
+function nextQuestion(){
+  qidx++;
+  if(qidx>=quiz.length){
+    document.getElementById('quiz-q').textContent=`Quiz complete — score ${qscore}/${quiz.length}`;
+    document.getElementById('quiz-options').innerHTML='';
+    document.getElementById('quiz-explain').style.display='none';
+    document.getElementById('quiz-next').style.display='none';
+    return;
+  }
+  renderQuiz();
+}
+renderQuiz();
+
+// ---- schedule ----
+const plan=[
+  {d:"Day 1",focus:"Mitochondria & ATP",tasks:[["9:00 AM","Review lecture notes on cellular respiration"],["4:00 PM","Flashcard drill — 20 cards"]]},
+  {d:"Day 2",focus:"Membrane Transport",tasks:[["9:00 AM","Read Chapter 4, section 3"],["6:00 PM","Practice quiz — 10 questions"]]},
+  {d:"Day 3",focus:"Mixed revision",tasks:[["9:00 AM","Re-quiz weak topics from Day 1–2"],["7:00 PM","Summarize notes in your own words"]]},
+  {d:"Day 4",focus:"Mitosis Phases",tasks:[["9:00 AM","Watch/read mitosis phase diagrams"],["4:00 PM","Flashcards — mitosis set"]]},
+  {d:"Day 5",focus:"DNA Replication",tasks:[["9:00 AM","Review replication enzymes"],["6:00 PM","Short-answer practice"]]},
+  {d:"Day 6",focus:"Full mock quiz",tasks:[["10:00 AM","20-question mixed quiz"],["5:00 PM","Review incorrect answers"]]},
+  {d:"Day 7",focus:"Light review",tasks:[["10:00 AM","Skim summary notes only"],["—","Rest — exam tomorrow"]]}
+];
+const sched=document.getElementById('schedule-list');
+plan.forEach(day=>{
+  const el=document.createElement('div');
+  el.className='day-card';
+  el.innerHTML=`<div class="day-head"><span class="d">${day.d}</span><span class="focus">Focus: ${day.focus}</span></div>`+
+    day.tasks.map(t=>`<div class="task"><span class="time">${t[0]}</span><span>${t[1]}</span></div>`).join('');
+  sched.appendChild(el);
+});
+</script>
+</body>
+</html>
